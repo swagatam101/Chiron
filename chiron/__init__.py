@@ -1,2 +1,2 @@
-from .topology import *
-from .diagrams import * 
+#from .topology import *
+#from .diagrams import * 
