@@ -562,7 +562,7 @@ class loopDiagramCreator:
         source file if needed 
         
         
-        *Args*:
+        *Args:*
             figsize: 
                 size of figure 
             circle-center: 
@@ -591,7 +591,8 @@ class loopDiagramCreator:
             start_angle: 
                 3/2 pi - gap_angle
             angle_span_deg:
-                [start angle, end_angle] in degrees          
+                [start angle, end_angle] in degrees 
+                
         """
         
         color_arc = '#726255'

@@ -456,7 +456,6 @@ def trimToGenusZero(LinkData):
             Links retained after culling, genus zero links
         trimmed_links:
             Links culled, genus changing 
-            
     """ 
     # need to find the set of all overlapping regions and of disjoint regions   
     # order the bonds first by the left orgin and then by the right origin 
@@ -557,7 +556,6 @@ def removeGenusZeroLinks(LinkData):
     *Returns*:
         removal_linkData:
             The list of links retained 
-    
     """
     
     org_tree = IntervalTree.from_tuples(list(map(tuple, LinkData)) )  
