@@ -17,8 +17,8 @@ setup(name='chiron',
       keywords=['topology', 'chromatin', 'l1 sparsity', 'polymer', 'machine learning'], 
       packages=['chiron'],
       scripts=['bin/example_HiC.py'],
-      install_requires=['numpy', 'matplotlib', 'networkx', 'collections', 'scipy', 'pandas', 
-          'bisect', 'copy', 'pylab', 'itertools'],
+      install_requires=['numpy', 'matplotlib', 'networkx', 'scipy', 'pandas', 
+          'bisect', 'copy'],
       include_package_data=True,
       zip_safe=False)
       
