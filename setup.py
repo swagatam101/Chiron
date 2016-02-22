@@ -18,7 +18,7 @@ setup(name='chiron',
       packages=['chiron'],
       scripts=['bin/example_HiC.py'],
       install_requires=['numpy', 'matplotlib', 'networkx', 'collections', 'scipy', 'pandas', 
-          'bisect', 'copy', 'pylab', 'itertools', 'warnings'],
+          'bisect', 'copy', 'pylab', 'itertools'],
       include_package_data=True,
       zip_safe=False)
       
