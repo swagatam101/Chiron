@@ -1,0 +1,707 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to Chiron’s documentation &mdash; chiron 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="chiron 0.0.1 documentation" href="#" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-chiron-s-documentation">
+<h1>Welcome to Chiron&#8217;s documentation<a class="headerlink" href="#welcome-to-chiron-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>In the current release, Chiron has two modules, <em>Topology</em> and <em>Diagrams</em>,
+avaiable in Chiron namespace. There are also several general purpose functions
+for visualizing Chromatin Conformation Capture Data, particularly, rainbow diagrams
+and loop diagrams along arc.</p>
+<p>Example loop diagram:</p>
+<div class="figure align-center">
+<img alt="_images/chr_22_all.png" src="_images/chr_22_all.png" />
+</div>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<div class="section" id="module-chiron.topology">
+<span id="topology"></span><h2>Topology:<a class="headerlink" href="#module-chiron.topology" title="Permalink to this headline">¶</a></h2>
+<p>Module containing the topological analysis functions in Chiron for genus computation 
+of chromatin links (specific interactions)  as input data (Nx2 each row is [p1, p2]
+for link origin and destination in genomic positions.</p>
+<dl class="function">
+<dt id="chiron.topology.computeGenus">
+<code class="descclassname">chiron.topology.</code><code class="descname">computeGenus</code><span class="sig-paren">(</span><em>Data</em>, <em>gap=65536</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.topology.computeGenus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function to compute the genus given Data (list of links, N x 2 cotacting 
+pairs of genomic positions).</p>
+<p>Creates a graph G to compute the number of connected components and genus. 
+First consider the case of no coincident ends for loop origins and terminations:</p>
+<p>Then each end in the link list would split into two, &#8220;real&#8221; (r) and &#8220;ghost&#8221; (g) 
+where address of ghost on the real line is greater than address of the &#8220;real&#8221;.</p>
+<p>Again, in the absence of coincident ends for each link:</p>
+<ol class="arabic simple">
+<li>The left ends &#8220;real&#8221; node shares an edge to the right end&#8217;s &#8220;ghost&#8221; node</li>
+<li>The left ends &#8220;ghost&#8221; node shares an edge to the right end&#8217;s &#8220;real&#8221; node, 
+exhausting edges correspoding to links</li>
+<li>Along the real line, only &#8220;ghost&#8221; nodes connect by edge to &#8220;real&#8221; nodes, 
+in linear order, and in consecutive pairing along the real line (backbone)</li>
+<li>Count the number of original loops = P (before creating ghosts). Call it P</li>
+<li>Count the number of loops (connected components) in the real + ghost graph, 
+call it L</li>
+<li>genus <img class="math" src="_images/math/e3c289f220c830b1ab0d5acb3bf0a216320596b0.png" alt="g = (P - L)/2"/></li>
+</ol>
+<p>Now coming to resolving coincident ends in a manner that introduces no new 
+crossings and doesn&#8217;t increase genus:</p>
+<ol class="arabic simple">
+<li>Coincident ends (with n link originating or terminating) will have to be 
+split into n real and n ghost nodes</li>
+<li>This splitting has to be done in an order such that the splitting itself 
+does not create new link crossings.</li>
+</ol>
+<p>Need to have a strategy for creating nodes such that points are easily ordered.</p>
+<p>Strategy:</p>
+<ol class="arabic simple">
+<li>Index all original link ends (nodes of G) by large even integers</li>
+<li>Create ghosts on large odd numbers</li>
+<li>Introduce new real nodes for coincident points in between these large even 
+numbers</li>
+<li>Ghosts&#8217; addresses are always s2 (here 1) greater than reals</li>
+<li>gap/s1 (s1 is an option in splitAndModify() function) is the region within 
+which all coincident ends are resolved, increase it if there
+are too many coincident ends</li>
+</ol>
+<p><em>Args:</em></p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Data: </dt>
+<dd>Nx2 link data</dd>
+<dt>gap:</dt>
+<dd>Gap between addresses of nodes corresponding to the ends of links</dd>
+</dl>
+</div></blockquote>
+<dl class="docutils">
+<dt><em>Returns:</em></dt>
+<dd><dl class="first last docutils">
+<dt>genus:</dt>
+<dd>computed genus</dd>
+<dt>G: </dt>
+<dd>networkx graph for computing genus</dd>
+<dt>LoopData:</dt>
+<dd>The list of edges corresponding to mapping of links</dd>
+<dt>backboneData:</dt>
+<dd>The list of edges corresponding to mapping of connectivity along the 
+genome</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.topology.computeGenusLengthScales">
+<code class="descclassname">chiron.topology.</code><code class="descname">computeGenusLengthScales</code><span class="sig-paren">(</span><em>LinkDataAll, powers=array([[ 6. , -inf],        [ 6.5,  0. ],        [ 7. ,  0. ],        [ 7.5,  0. ]]), overlapping=False, compute_randomize=False, num_randomize=10</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.topology.computeGenusLengthScales" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes genus at different lengthscales, returns two dicts, of genus and of 
+counts of loops found in windows of lengthscale steps.</p>
+<dl class="docutils">
+<dt><em>Args</em>:</dt>
+<dd><dl class="first last docutils">
+<dt>LinkDataAll: </dt>
+<dd>Nx2 links, rows (p1,p2)</dd>
+<dt>powers:</dt>
+<dd>log10(length scales), first row is long distance scale of link sizes, 
+second column is short distance scale, analysis is for pairs (rows)</dd>
+<dt>overlapping: </dt>
+<dd>Binary, if true creates windows that overlap one-half window size</dd>
+<dt>compute_randomize: </dt>
+<dd>Binary, whether to randomize links and compute genus for each window</dd>
+<dt>num_randomize: </dt>
+<dd>Number of times to randomize the links</dd>
+</dl>
+</dd>
+<dt><em>Returns</em>:</dt>
+<dd><dl class="first last docutils">
+<dt>genus_data: dict of lists of genus computation, keys are length scales, </dt>
+<dd>List is for each window along the genome</dd>
+<dt>count_loops:</dt>
+<dd>Dict of lists, counts of links in each window, same keys as above</dd>
+<dt>xbinsAll: </dt>
+<dd>Dict of dict of list. Highest dict is &#8216;left&#8217; and &#8216;right&#8217;, for left
+and right edges of windows, the next level dict is identical to above</dd>
+<dt>genus_data_random:</dt>
+<dd>Dict of list, where the list is a counter for each genus value (integers)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.topology.randomizeLinks">
+<code class="descclassname">chiron.topology.</code><code class="descname">randomizeLinks</code><span class="sig-paren">(</span><em>LinkDataAll</em>, <em>chrmRange=None</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.topology.randomizeLinks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Randomize LinkData, where randomization is done by maintaining the number of
+links and their lengths, but just scrambling the ends randomly</p>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><dl class="first last docutils">
+<dt>LinkDataAll:</dt>
+<dd>Nx2 links, rows (p1,p2)</dd>
+</dl>
+</dd>
+<dt><em>Returns:</em>    </dt>
+<dd><dl class="first last docutils">
+<dt>LinkDataRandom:</dt>
+<dd>Nx2 random links, rows (q1,q2)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.topology.removeGenusZeroLinks">
+<code class="descclassname">chiron.topology.</code><code class="descname">removeGenusZeroLinks</code><span class="sig-paren">(</span><em>LinkData</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.topology.removeGenusZeroLinks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all links that are are equivalent toplogically to other links and
+do not contribute to genus! Uses IntervalTree to find all crossing links to a 
+given link (in O(N log N) vs. O(N^2) for N links).</p>
+<p>Required IntervalTree package!</p>
+<dl class="docutils">
+<dt><em>Args</em>:</dt>
+<dd><dl class="first last docutils">
+<dt>LinkData: </dt>
+<dd>Nx2 links, rows (p1,p2)</dd>
+</dl>
+</dd>
+<dt><em>Returns</em>:</dt>
+<dd><dl class="first last docutils">
+<dt>removal_linkData:</dt>
+<dd>The list of links retained</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.topology.splitAndModify">
+<code class="descclassname">chiron.topology.</code><code class="descname">splitAndModify</code><span class="sig-paren">(</span><em>left</em>, <em>right</em>, <em>G</em>, <em>address</em>, <em>counter</em>, <em>LoopData</em>, <em>gap=65536</em>, <em>s1=4</em>, <em>s2=1</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.topology.splitAndModify" title="Permalink to this definition">¶</a></dt>
+<dd><p>This &#8220;splits&#8221; the coincident links (at either origin or termination end) and 
+modifies the graph for genus computation appropriately. See algorithm details
+and computeGenus(). Coincident ends are resolved by &#8220;splitting&#8221; such that new
+crossings (genus-increasing) of links is not introduced as a result.</p>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><dl class="first last docutils">
+<dt>left:</dt>
+<dd>origin of link</dd>
+<dt>right:</dt>
+<dd>termination of link, left &lt; right in genomic positions</dd>
+<dt>G:</dt>
+<dd>networkx graph for the link</dd>
+<dt>address: </dt>
+<dd>address map for genome positions onto the odd and even numbers, see
+computeGenus()</dd>
+<dt>counter: </dt>
+<dd>counter for number of coincident link ends</dd>
+<dt>LoopData:</dt>
+<dd>The list of lists of edges that correspond to links established between
+&#8220;real&#8221; and &#8220;ghost&#8221; points, as a result of splitting etc.</dd>
+<dt>gap:</dt>
+<dd>The gap on the even number line for mapping and splitting link ends,
+see computeGenus()</dd>
+<dt>s1: </dt>
+<dd>gap/s1 is the window within which all splitting is done</dd>
+<dt>s2:</dt>
+<dd>s2 is the odd step from even &#8220;real&#8221; points to add &#8220;ghost&#8221; points, 
+see computeGenus()</dd>
+</dl>
+</dd>
+<dt><em>Returns:</em></dt>
+<dd><dl class="first last docutils">
+<dt>G: </dt>
+<dd>modified networkx graph, result of splitting etc.</dd>
+<dt>counter:</dt>
+<dd>modified...</dd>
+<dt>LoopData:</dt>
+<dd>modified by adding new edges to the graph</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.topology.trimToGenusZero">
+<code class="descclassname">chiron.topology.</code><code class="descname">trimToGenusZero</code><span class="sig-paren">(</span><em>LinkData</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.topology.trimToGenusZero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Culls link such that the new set of links is guranteed to be genus zero, 
+maximally crossing links are culled first, with preference to retaining long 
+range links.</p>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><dl class="first last docutils">
+<dt>LinkData: </dt>
+<dd>Nx2 links, rows (p1, p2)</dd>
+</dl>
+</dd>
+<dt><em>Returns;</em></dt>
+<dd><blockquote class="first">
+<div><dl class="docutils">
+<dt>clusters: </dt>
+<dd>Clusters of links that isolate along the genone</dd>
+<dt>kept_clusters:</dt>
+<dd>Clusters after trimming</dd>
+</dl>
+</div></blockquote>
+<dl class="last docutils">
+<dt>kept_links: </dt>
+<dd>Links retained after culling, genus zero links</dd>
+<dt>trimmed_links:</dt>
+<dd>Links culled, genus changing</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.topology.uniquerows">
+<code class="descclassname">chiron.topology.</code><code class="descname">uniquerows</code><span class="sig-paren">(</span><em>Mat</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.topology.uniquerows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the unique rows of a matrix</p>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><dl class="first last docutils">
+<dt>Mat: </dt>
+<dd>matrix input</dd>
+</dl>
+</dd>
+<dt><em>Returns:</em></dt>
+<dd><dl class="first last docutils">
+<dt>Mat:</dt>
+<dd>Matrix with unique rows</dd>
+<dt>idx:</dt>
+<dd>Index of rows that are unique</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-chiron.diagrams">
+<span id="diagrams"></span><h2>Diagrams:<a class="headerlink" href="#module-chiron.diagrams" title="Permalink to this headline">¶</a></h2>
+<p>Module containing the visualization function in Chiron for genus computation 
+visualizations of chromatin loop domains. Input data is list of links identified 
+to be in two-point specific contacts (by other programs)</p>
+<dl class="function">
+<dt id="chiron.diagrams.computeMajor">
+<code class="descclassname">chiron.diagrams.</code><code class="descname">computeMajor</code><span class="sig-paren">(</span><em>ratio</em>, <em>circum</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.computeMajor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the complete elliptic integrals of second kind to figure out what value
+of major axis corresponds to the circumference, given b/a ratio</p>
+<p><img class="math" src="_images/math/33ec5ac6dc4b3078ee397349a2e83e9b441a7f2f.png" alt="circum = 4 a E(k)"/> where <img class="math" src="_images/math/b17d6957fa544921e62bd24f4dc1310ef247a7aa.png" alt="k = \sqrt{ 1- b^2/a^2 } = \sqrt{1 - ratio^2}"/> 
+therefore, <img class="math" src="_images/math/3681d086577745d535a8c00997f1c9689f3015db.png" alt="a = circum/(4E(k))"/></p>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><dl class="first last docutils">
+<dt>ratio: </dt>
+<dd>ratio of semi-minor to semi-major axis of Ellipse, ratio = b/a &lt;= 1</dd>
+<dt>circum: </dt>
+<dd>circumference/perimeter of ellipse</dd>
+</dl>
+</dd>
+<dt><em>Returns:</em></dt>
+<dd><dl class="first last docutils">
+<dt>a: </dt>
+<dd>semi-major axis of ellipse</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.diagrams.createRainbow">
+<code class="descclassname">chiron.diagrams.</code><code class="descname">createRainbow</code><span class="sig-paren">(</span><em>LinkDataAll</em>, <em>backbone=None</em>, <em>xRange=None</em>, <em>shiftRatio=0.01</em>, <em>yMaxFrac=2</em>, <em>ax=None</em>, <em>unit=1</em>, <em>title=''</em>, <em>cmap='spectral'</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.createRainbow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates custom &#8220;rainbow plots&#8221; displaying specific interaction pairs, has 
+the option of diplaying weights of interactions. Can display genus 
+computation connected-components, grey, or color.</p>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><dl class="first last docutils">
+<dt>LinkDataAll: </dt>
+<dd>List of lists [p1, p2] or [p1, p2, w12] where p1 and p2 
+are genomic locations of interacting points. LinkData all is Nx2 or Nx3
+array, weights w12 are optional. For connected-components w12
+the component index. Color figure is plotted if weights provided.</dd>
+<dt>backbone: </dt>
+<dd>Used only when displaying genus computation where &#8220;vertices&#8221; form of 
+interaction links and the intervening polymer (backbone), see 
+computeGenus, ignore if visualizing multi-C data</dd>
+<dt>xRange: </dt>
+<dd>Range of genomic region; defaults to, 
+xRange = [np.min(LinkDataAll[:,:2]), np.max(LinkDataAll[:,:2])]</dd>
+<dt>shiftRatio:</dt>
+<dd><p class="first">Is the fraction of the xRange (the length of genomic region viewed) 
+that the baseline is shifted by,</p>
+<p class="last">shift = shiftRatio*(xRange[1] - xRange[0])</p>
+</dd>
+<dt>yMaxFrac:</dt>
+<dd>Determines the y-range as a fraction of the largest loop, useful to zoom
+in if there is one very large loop; yMax = max_loop_size*yMaxFrac,
+ax.set_ylim([0, yMax])</dd>
+<dt>ax: </dt>
+<dd>Can pass axis of a figure to plot</dd>
+<dt>unit: </dt>
+<dd>Is the genomic unit for xticks, set to 10^3 to get xticks in Kbs 
+for example</dd>
+<dt>title: </dt>
+<dd>Title of the plot</dd>
+<dt>cmap: </dt>
+<dd>Color map for display of weights</dd>
+</dl>
+</dd>
+<dt><em>Returns:</em></dt>
+<dd>figure axis</dd>
+<dt><em>Examples:</em> </dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">createRainbow</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">7</span><span class="p">][</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">][</span><span class="mi">12</span><span class="p">,</span> <span class="mi">15</span><span class="p">]]))</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="chiron.diagrams.loopDiagramCreator">
+<em class="property">class </em><code class="descclassname">chiron.diagrams.</code><code class="descname">loopDiagramCreator</code><span class="sig-paren">(</span><em>Data</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.loopDiagramCreator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does all the computation to create loop diagrams (see paper). 
+Loop diagrams are constructed by minimally reducing the list of links 
+(specific interactions) called &#8220;Data&#8221; here, such that the reduced set is
+genus zero (planar, non-crossing). The outermost loop for a &#8220;cluster&#8221; of
+loop-within-loop is the &#8220;footprint&#8221; loop. The &#8220;footprint&#8221; loops become
+ellipses (with realistic perimeter), and the planar loops are drawn as
+links in one color(blue) and the offending loops (genus-increasing) drawn in
+another(orange). The backbone (non-looped section) are displayed on a (semi)
+circle.</p>
+<dl class="method">
+<dt id="chiron.diagrams.loopDiagramCreator.findFootPrints">
+<code class="descname">findFootPrints</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.loopDiagramCreator.findFootPrints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the &#8220;footprint&#8221; of planar links; isolated loops along the 
+chromatin which are independent loop domains.</p>
+<dl class="docutils">
+<dt><em>Attributes:</em></dt>
+<dd><dl class="first last docutils">
+<dt>FPs: </dt>
+<dd>numpy array of &#8220;footprints&#8221;</dd>
+<dt>xRange: </dt>
+<dd>The range of the backbone excluding the looped out domains</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="chiron.diagrams.loopDiagramCreator.findxy">
+<em class="property">static </em><code class="descname">findxy</code><span class="sig-paren">(</span><em>all_phi</em>, <em>all_path_length</em>, <em>arc_length</em>, <em>semi_major</em>, <em>ratio</em>, <em>theta=-1.5707963267948966</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.loopDiagramCreator.findxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds location (x,y) on an ellipse (center at (0,0) with major axis along 
+x-axis at zero rotation) which is rotated anti-clockwise by angle theta; 
+given the the grid of ellipse paramter phi, the evaluation of perimeter 
+along the ellipse for phi, the semi_major axis of the ellipse, and the 
+arc_length to match.</p>
+<dl class="docutils">
+<dt><em>Args:</em> </dt>
+<dd><dl class="first last docutils">
+<dt>all_phi: </dt>
+<dd>see precomputeEllipticArc() method</dd>
+<dt>all_path_length: </dt>
+<dd>see precomputeEllipticArc() method</dd>
+<dt>arc_length: </dt>
+<dd>the arc length upto the point for which location is queried</dd>
+<dt>semi_major: </dt>
+<dd>a of Ellipse</dd>
+<dt>ratio: </dt>
+<dd>b/a</dd>
+<dt>theta: </dt>
+<dd>angle of anti-clockwise rotation of ellipse</dd>
+</dl>
+</dd>
+<dt><em>Returns:</em></dt>
+<dd><dl class="first last docutils">
+<dt>np.array([x,y]): </dt>
+<dd>location</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="chiron.diagrams.loopDiagramCreator.loopDiagramFig">
+<code class="descname">loopDiagramFig</code><span class="sig-paren">(</span><em>figsize=(40, 20), circle_center=[0, 0], ratio=0.33, grid_size=1000, gap_angle=1.5707963267948966, unit=1000000, annotation_angle_gap=3</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.loopDiagramCreator.loopDiagramFig" title="Permalink to this definition">¶</a></dt>
+<dd><p>The plotting function for the loop diagrams, change the colors in the 
+source file if needed</p>
+<dl class="docutils">
+<dt><em>Args</em>:</dt>
+<dd><dl class="first last docutils">
+<dt>figsize: </dt>
+<dd>size of figure</dd>
+<dt>circle-center: </dt>
+<dd>center of the (semi-) circle for the backbone</dd>
+<dt>ratio:</dt>
+<dd>b/a for all eliipses to be display loop domains</dd>
+<dt>grid_size:</dt>
+<dd>grid size for precomuting the elliptic arc lengths against ellipse
+parametric angle</dd>
+<dt>gap_angle: </dt>
+<dd>The angle of gap left from bottom of circle to left clockwise
+for the backbone semi-circle drawing</dd>
+<dt>unit:</dt>
+<dd>Genomic unit, 10^6 is 1 Mb for example</dd>
+<dt>annotation_angle_gap:</dt>
+<dd>Minimum angle left between succesive annotation of genomic position
+to avoid over crowding</dd>
+</dl>
+</dd>
+<dt><em>Attributes:</em></dt>
+<dd><p class="first">ratio: 
+grid_size:
+gap_angle:
+circle_center:
+start_angle:</p>
+<blockquote>
+<div>3/2 pi - gap_angle</div></blockquote>
+<dl class="last docutils">
+<dt>angle_span_deg:</dt>
+<dd>[start angle, end_angle] in degrees</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="chiron.diagrams.loopDiagramCreator.precomputeEllipticArc">
+<em class="property">static </em><code class="descname">precomputeEllipticArc</code><span class="sig-paren">(</span><em>grid_size</em>, <em>ratio</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.loopDiagramCreator.precomputeEllipticArc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Precomputes the incomplete elliptic integrals on a grid of theta so that 
+one can find the adress on a ellipse (x, y coordinates) for a given arc 
+length, <img class="math" src="_images/math/dae0b681a7136eea6aa538bf52c5c108b763348f.png" alt="k = \sqrt{1 - b^2/a^2}"/> where b is semi-minor and a is 
+semi-major axis of the ellipse</p>
+<dl class="docutils">
+<dt><em>Args:</em>  </dt>
+<dd><dl class="first last docutils">
+<dt>grid_size: </dt>
+<dd>The number of points (on a=1 ellipse) where the 
+incomplete elliptic integrals is computed</dd>
+<dt>ratio: </dt>
+<dd>b/a (semi-minor/semi-major) of Ellipse</dd>
+</dl>
+</dd>
+<dt><em>Returns:</em> </dt>
+<dd><dl class="first last docutils">
+<dt>all_phi: </dt>
+<dd>the grid of angles (ellipse parameter) on which the arc 
+lengths are evaluated</dd>
+<dt>all_path_lengths: </dt>
+<dd>the evaluated arc lengths</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.diagrams.plotGenusLengthScale">
+<code class="descclassname">chiron.diagrams.</code><code class="descname">plotGenusLengthScale</code><span class="sig-paren">(</span><em>genus_accumulator</em>, <em>random_genus_accumulator</em>, <em>powers</em>, <em>display='upper'</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.plotGenusLengthScale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Summary plot of length scale vs genus with error bars for observed and randomized
+results</p>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><dl class="first last docutils">
+<dt>genus_accumulator: </dt>
+<dd>dict of list of genus computation in bins at various length-scales (keys
+of dict)</dd>
+<dt>random_genus_accumulator: </dt>
+<dd>Randomized links genus</dd>
+<dt>powers:</dt>
+<dd>Lx2 powers of 10 for L (i.e. log10(length-scales)) with rows for
+upper and lower length-scale cutoffs.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.diagrams.plotGenusStats">
+<code class="descclassname">chiron.diagrams.</code><code class="descname">plotGenusStats</code><span class="sig-paren">(</span><em>genus_data</em>, <em>count_data</em>, <em>powers</em>, <em>prob_max=1</em>, <em>random_genus_accumulator=None</em>, <em>display='upper'</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.plotGenusStats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots a grid of histograms of genus, genus of randomized links and counts of 
+observed links at length scales along rows, columns are different length-scales</p>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><dl class="first last docutils">
+<dt>genus_data: </dt>
+<dd>The genus computed locally, dict. of lists with keys for length scales</dd>
+<dt>count_loops: </dt>
+<dd>The number of links that featured in the above locla genus computation,
+dict of list as above</dd>
+<dt>powers: </dt>
+<dd>Lx2 array of powers (of 10) for upper (column 0) and lower length scale
+(column 1)</dd>
+<dt>prob_max:</dt>
+<dd>The y limit of probability (y-axis) in histograms</dd>
+<dt>randon_genus_accumulator: </dt>
+<dd>If not none, then plots the random data provided here, corresponding 
+to the randomization of the genus data</dd>
+<dt>display: </dt>
+<dd>&#8220;upper&#8221; or &#8220;lower&#8221; for upper or lower length scale to display as titles</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.diagrams.visualize">
+<code class="descclassname">chiron.diagrams.</code><code class="descname">visualize</code><span class="sig-paren">(</span><em>genus</em>, <em>G</em>, <em>LoopData</em>, <em>backboneData</em>, <em>Data</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.visualize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize computed genus using custom rainbow diagrams</p>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><dl class="first last docutils">
+<dt>genus:</dt>
+<dd>computed genus</dd>
+<dt>G:</dt>
+<dd>networkx graph returned by genus computation, see topology module</dd>
+<dt>LoopData:</dt>
+<dd>Which of the edges of the graph are links correspoding to loops</dd>
+<dt>backboneData: </dt>
+<dd>which of the edges of the graph contribute to the &#8220;backbone&#8221; along the
+genome</dd>
+<dt>Data: </dt>
+<dd>Orginal data of links (Nx2 of each row [p1,p2])</dd>
+<dt><a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs:</dt>
+<dd>Args. passed on to createRainbow()</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="chiron.diagrams.visualizeGenusLengthScales">
+<code class="descclassname">chiron.diagrams.</code><code class="descname">visualizeGenusLengthScales</code><span class="sig-paren">(</span><em>genus_data</em>, <em>count_loops</em>, <em>xBinsAll</em>, <em>powers</em>, <em>units=10000000</em>, <em>prob_max=1</em>, <em>show_counts=True</em>, <em>display='upper'</em><span class="sig-paren">)</span><a class="headerlink" href="#chiron.diagrams.visualizeGenusLengthScales" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize the genus computation at various lengthscales and the summary 
+histograms of genus (and counts) of loops at those lengthscales; 
+plots a heatmap along the genome with local genus variaiton form median
+value at that length-scale. One row for each length-scale.</p>
+<p>Use computeGenusLengthScales() to compute the args. of this.</p>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><dl class="first last docutils">
+<dt>genus_data: </dt>
+<dd>The genus computed locally, dict. of lists with keys for length scales</dd>
+<dt>count_loops: </dt>
+<dd>The number of links that featured in the above locla genus computation,
+dict of list as above</dd>
+<dt>xBinsAll:</dt>
+<dd>The bin edge positions along the genome (dict of list) for the above</dd>
+<dt>powers: </dt>
+<dd>Lx2 array of powers (of 10) for upper (column 0) and lower length scale
+(column 1)</dd>
+<dt>units:</dt>
+<dd>Units in genome length</dd>
+<dt>prob_max:</dt>
+<dd>The y limit of probability (y-axis) in histograms</dd>
+<dt>show_counts: </dt>
+<dd>Binary, whether to plot the distribution of count_loops</dd>
+<dt>display: </dt>
+<dd>&#8220;upper&#8221; or &#8220;lower&#8221; for upper or lower length scale to display as titles</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to Chiron&#8217;s documentation</a><ul>
+<li><a class="reference internal" href="#module-chiron.topology">Topology:</a></li>
+<li><a class="reference internal" href="#module-chiron.diagrams">Diagrams:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, swagatam mukhopadhyay.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/index.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
