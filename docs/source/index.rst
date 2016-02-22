@@ -20,14 +20,10 @@ Example loop diagram:
 .. toctree::
    :maxdepth: 5
 
-Topology: 
-----------------------------------
 
 .. automodule:: chiron.topology
     :members:
     
-Diagrams:
-----------------------------------
 
 .. automodule:: chiron.diagrams
     :members:
